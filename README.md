@@ -36,6 +36,17 @@ A qualidade de cada solução será avaliada por meio de uma função de **fitne
 
 ---
 
+## Dependencias
+
+- npm install
+
+Instalar Bibliotecas
+- npm install bootstrap recharts
+
+Executar a Aplicação
+- npm run dev
+
+
 ## Algoritmos
 
 ### Algoritmo Genético
