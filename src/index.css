@@ -93,7 +93,6 @@ h1, h2, h3, h4, .h4, .h5 {
 .estufa-arco { color: var(--verde-natural); font-size: 2.5rem; line-height: 0.5; }
 .estufa-status { position: absolute; right: clamp(1rem, 3vw, 2.5rem); color: var(--cinza-quente); font-size: 0.62rem; letter-spacing: 0.08em; }
 .estufa-casca .cartao-zona { background: rgba(255,255,255,0.88); }
-.estufa-casca .btn-sm { --bs-btn-padding-y: 0.18rem; --bs-btn-padding-x: 0.65rem; font-size: 0.72rem; }
 .estufa-nota, .estufa-sem-zonas { margin: 0.8rem 0 0; text-align: center; color: var(--cinza-quente); font-size: 0.82rem; }
 .configuracao-cenario { scroll-margin-top: 6rem; }
 .configuracao-bloco { padding: 1.45rem 0; border-top: 1px solid var(--borda); }
@@ -111,8 +110,6 @@ h1, h2, h3, h4, .h4, .h5 {
 .planta-item p span { color: var(--verde-natural); padding: 0 0.15rem; }
 .planta-item .planta-detalhe { color: var(--cinza-quente); }
 .configuracao-explicacao { max-width: 58ch; margin: 0; color: var(--cinza-quente); font-size: 0.9rem; }
-.formulario-cenario { max-width: 42rem; margin: 0.75rem 0 1rem auto; padding: 1.5rem; border: 1px solid var(--borda); border-radius: var(--raio-cartao); background: #fff; box-shadow: var(--sombra-suave); }
-.formulario-cenario h3 { margin-bottom: 1.1rem; font-size: 1.35rem; }
 .relacao-otimizacao { display: flex; align-items: center; gap: 1.25rem; padding: 1.35rem 1.5rem; border-radius: var(--raio-cartao); background: var(--verde-pistache-claro); }
 .relacao-icone { flex: 0 0 auto; display: grid; place-items: center; width: 3rem; height: 3rem; background: #fff; border-radius: 50%; font-size: 1.35rem; }
 .relacao-otimizacao p { flex: 1; margin: 0; color: var(--cinza-quente); font-size: 0.92rem; }

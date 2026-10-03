@@ -1,10 +1,7 @@
-import { useState } from 'react'
-import FormularioPlanta from '../componentes/FormularioPlanta'
-import FormularioZona from '../componentes/FormularioZona'
 import GradeEstufa from '../componentes/GradeEstufa'
 import { useEstufa } from '../contexto/useEstufa'
 
-const ICONES_PLANTA = { Tomate: '🍅', Alface: '🥬', Manjericão: '🌿' }
+const ICONES_PLANTA = { Tomate: '🍅', Alface: '🥬', Manjericão: '🌿', Pimentão: '🫑', Pepino: '🥒', Morango: '🍓' }
 
 function Passo({ icone, titulo, descricao, ultimo = false }) {
   return (
@@ -18,27 +15,8 @@ function Passo({ icone, titulo, descricao, ultimo = false }) {
 }
 
 export default function Estufa() {
-  const {
-    plantas,
-    zonas,
-    resultados,
-    salvarPlanta,
-    removerPlanta,
-    salvarZona,
-    removerZona,
-  } = useEstufa()
-  const [edicao, setEdicao] = useState(null)
+  const { plantas, plantasIndividuais, zonas, resultados } = useEstufa()
   const resultadoAtual = Object.values(resultados).slice(-1)[0]
-
-  const guardarPlanta = (planta) => {
-    salvarPlanta(planta)
-    setEdicao(null)
-  }
-
-  const guardarZona = (zona) => {
-    salvarZona(zona)
-    setEdicao(null)
-  }
 
   return (
     <>
@@ -48,12 +26,11 @@ export default function Estufa() {
           <h1 id="titulo-estufa">Uma estufa.<br /><em>Muitas combinações.</em></h1>
           <p>
             Cada planta tem necessidades próprias. Cada zona oferece condições diferentes.
-            Configure o cenário e explore como os algoritmos podem encontrar uma distribuição adequada.
+            Conheça a instância-base usada para explorar como os algoritmos encontram uma distribuição adequada.
           </p>
-          <a className="btn btn-primary" href="#configuracao-cenario">Configurar cenário</a>
+          <a className="btn btn-primary" href="#cenario-base">Ver cenário-base</a>
         </div>
         <aside className="problema-resumo">
-          <span className="problema-selo" aria-hidden="true">01</span>
           <h2>O problema</h2>
           <p>
             Temperatura, umidade, luminosidade, água e capacidade definem onde cada planta
@@ -83,53 +60,43 @@ export default function Estufa() {
         </div>
       </section>
 
-      <section className="estufa-secao" aria-labelledby="titulo-visual-estufa">
+      <section id="dentro-estufa" className="estufa-secao" aria-labelledby="titulo-visual-estufa">
         <div className="secao-heading">
           <div>
-            <span className="sobretitulo">Instância atual · {zonas.length} zonas</span>
+            <span className="sobretitulo">Instância-base · {zonas.length} zonas · {plantasIndividuais.length} plantas</span>
             <h2 id="titulo-visual-estufa">Dentro da estufa</h2>
           </div>
-          <span className="estufa-legenda"><span /> Cenário configurado</span>
+          <span className="estufa-legenda"><span /> Cenário de estudo fixo</span>
         </div>
         <div className="estufa-casca">
           <div className="estufa-casca-topo">
             <span className="estufa-arco" aria-hidden="true">⌒</span>
             <span>ESTUFA INTELIGENTE</span>
-            <span className="estufa-status">{resultadoAtual ? 'DISTRIBUIÇÃO ENCONTRADA' : 'CENÁRIO DE ESTUDO'}</span>
+            <span className="estufa-status">{resultadoAtual ? 'DISTRIBUIÇÃO ENCONTRADA' : 'CENÁRIO-BASE'}</span>
           </div>
           {zonas.length > 0 ? (
-            <GradeEstufa
-              zonas={zonas}
-              distribuicao={resultadoAtual?.distribuicao ?? null}
-              acoesZona={(zona) => (
-                <div className="d-flex gap-1">
-                  <button type="button" className="btn btn-sm btn-outline-secondary" aria-label={`Editar ${zona.nome}`} onClick={() => setEdicao({ tipo: 'zona', registro: zona })}>Editar</button>
-                  <button type="button" className="btn btn-sm btn-outline-secondary" aria-label={`Remover ${zona.nome}`} onClick={() => removerZona(zona.id)}>Remover</button>
-                </div>
-              )}
-            />
+            <GradeEstufa zonas={zonas} distribuicao={resultadoAtual?.distribuicao ?? null} />
           ) : (
-            <p className="estufa-sem-zonas">Adicione zonas na configuração do cenário para compor a estufa.</p>
+            <p className="estufa-sem-zonas">Nenhuma zona está definida nos dados-base.</p>
           )}
           {!resultadoAtual && zonas.length > 0 && (
-            <p className="estufa-nota">Execute uma otimização para visualizar as plantas distribuídas pelas zonas.</p>
+            <p className="estufa-nota">Execute uma otimização para visualizar a distribuição das plantas pelas zonas.</p>
           )}
         </div>
       </section>
 
-      <section id="configuracao-cenario" className="configuracao-cenario" aria-labelledby="titulo-configuracao">
+      <section id="cenario-base" className="configuracao-cenario" aria-labelledby="titulo-cenario-base">
         <div className="secao-heading">
           <div>
-            <span className="sobretitulo">A instância do problema</span>
-            <h2 id="titulo-configuracao">Configuração do cenário</h2>
+            <span className="sobretitulo">Entrada controlada dos experimentos</span>
+            <h2 id="titulo-cenario-base">Cenário-base</h2>
           </div>
-          <p>Defina quais plantas e zonas serão usadas na próxima execução.</p>
+          <p>Plantas e zonas são fixas e compartilhadas entre as execuções para manter a comparação justa.</p>
         </div>
 
         <div className="configuracao-bloco" aria-labelledby="titulo-plantas">
           <div className="configuracao-subtitulo">
-            <div><span className="subtitulo-icone" aria-hidden="true">🌿</span><h3 id="titulo-plantas">Plantas <small>{plantas.length} tipos</small></h3></div>
-            <button type="button" className="btn btn-primary btn-sm" onClick={() => setEdicao({ tipo: 'planta', registro: null })}>Adicionar planta</button>
+            <div><span className="subtitulo-icone" aria-hidden="true">🌿</span><h3 id="titulo-plantas">Plantas <small>{plantas.length} tipos · {plantasIndividuais.length} individuais</small></h3></div>
           </div>
           <div className="row g-3">
             {plantas.map((planta) => (
@@ -141,34 +108,11 @@ export default function Estufa() {
                   </div>
                   <p>{planta.temperaturaMinima}–{planta.temperaturaMaxima}°C <span>·</span> {planta.umidadeMinima}–{planta.umidadeMaxima}% umidade</p>
                   <p className="planta-detalhe">Luz {planta.luminosidade} <span>·</span> {planta.consumoAgua} L/dia</p>
-                  <div className="d-flex gap-2 mt-3">
-                    <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => setEdicao({ tipo: 'planta', registro: planta })}>Editar</button>
-                    <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => removerPlanta(planta.id)}>Remover</button>
-                  </div>
                 </article>
               </div>
             ))}
           </div>
         </div>
-
-        <div className="configuracao-bloco configuracao-zonas" aria-labelledby="titulo-zonas">
-          <div className="configuracao-subtitulo">
-            <div><span className="subtitulo-icone" aria-hidden="true">☀️</span><h3 id="titulo-zonas">Zonas <small>{zonas.length} destinos possíveis</small></h3></div>
-            <button type="button" className="btn btn-primary btn-sm" onClick={() => setEdicao({ tipo: 'zona', registro: null })}>Adicionar zona</button>
-          </div>
-          <p className="configuracao-explicacao">Cada zona representa um destino possível, com condições ambientais e capacidade próprias.</p>
-        </div>
-
-        {edicao && (
-          <section className="formulario-cenario" aria-labelledby="titulo-formulario-cenario">
-            <h3 id="titulo-formulario-cenario">{edicao.registro ? 'Editar' : 'Adicionar'} {edicao.tipo === 'planta' ? 'planta' : 'zona'}</h3>
-            {edicao.tipo === 'planta' ? (
-              <FormularioPlanta key={`planta-${edicao.registro?.id ?? 'nova'}`} planta={edicao.registro} aoSalvar={guardarPlanta} aoCancelar={() => setEdicao(null)} />
-            ) : (
-              <FormularioZona key={`zona-${edicao.registro?.id ?? 'nova'}`} zona={edicao.registro} aoSalvar={guardarZona} aoCancelar={() => setEdicao(null)} />
-            )}
-          </section>
-        )}
       </section>
 
       <section className="relacao-otimizacao" aria-label="Relação entre plantas, zonas e otimização">

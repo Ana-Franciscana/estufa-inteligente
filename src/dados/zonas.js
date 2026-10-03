@@ -1,5 +1,5 @@
-// Dados iniciais de modelagem das zonas da estufa (valores de exemplo, editáveis na interface).
-
+// INSTÂNCIA-BASE dos experimentos. As quatro zonas permanecem fixas na interface.
+// Para um estudo futuro, as características do cenário podem ser alteradas diretamente aqui.
 export const ZONAS_INICIAIS = [
   { id: 1, nome: 'Zona 1', temperatura: 24, umidade: 80, luminosidade: 'alta', aguaDisponivel: 80, capacidade: 5 },
   { id: 2, nome: 'Zona 2', temperatura: 28, umidade: 60, luminosidade: 'alta', aguaDisponivel: 60, capacidade: 4 },

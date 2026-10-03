@@ -6,7 +6,7 @@ import SeloLuminosidade from './SeloLuminosidade'
 // Sem `grupo`, a zona é exibida vazia (nenhuma distribuição aplicada).
 const ICONE_PLANTA = { Tomate: '🍅', Alface: '🥬', Manjericão: '🌿' }
 
-export default function CartaoZona({ zona, grupo, compacto = false, acoes }) {
+export default function CartaoZona({ zona, grupo, compacto = false }) {
   const ocupacao = grupo?.ocupacao ?? 0
   const excedida = ocupacao > zona.capacidade
   const percentual = Math.min(100, (ocupacao / zona.capacidade) * 100)
@@ -15,10 +15,7 @@ export default function CartaoZona({ zona, grupo, compacto = false, acoes }) {
     <article className={`cartao-zona${excedida ? ' cartao-zona-excedida' : ''}`}>
       <header className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
         <h3 className="cartao-zona-nome">{zona.nome}</h3>
-        <div className="d-flex align-items-center gap-2 flex-wrap">
-          {!compacto && <SeloLuminosidade nivel={zona.luminosidade} />}
-          {acoes}
-        </div>
+        {!compacto && <SeloLuminosidade nivel={zona.luminosidade} />}
       </header>
 
       <p className="cartao-zona-condicoes">
