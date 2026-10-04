@@ -131,7 +131,7 @@ export function validarExperimento({ tipoExperimento, valores, rodadas }) {
   if (!tipo) return ['Escolha um tipo de experimento válido.']
   const erros = []
   if (!ehInteiro(rodadas) || rodadas < 1 || rodadas > LIMITE_RODADAS) {
-    erros.push(`O número de rodadas deve ser um inteiro entre 1 e ${LIMITE_RODADAS}.`)
+    erros.push(`O número de repetições deve ser um inteiro entre 1 e ${LIMITE_RODADAS}.`)
   }
   if (tipo.parametro) {
     if (valores.length === 0) erros.push('Informe ao menos um valor para o experimento.')
