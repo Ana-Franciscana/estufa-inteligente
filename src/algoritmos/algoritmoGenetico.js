@@ -1,139 +1,176 @@
-// ALGORITMO GENÉTICO (AG) — Estufa Inteligente
-//
-// IDEIA GERAL (como se fosse a evolução da natureza):
-//   1. Criamos uma "população" de soluções aleatórias (cada solução é uma forma de
-//      distribuir as plantas pelas zonas).
-//   2. Damos uma nota para cada solução (o FITNESS: quanto maior, melhor).
-//   3. As melhores soluções têm mais chance de virar "pais" (SELEÇÃO).
-//   4. Os pais trocam pedaços entre si e geram "filhos" (CROSSOVER).
-//   5. Alguns genes dos filhos mudam ao acaso (MUTAÇÃO) — isso traz novidades.
-//   6. As melhores soluções passam direto para a próxima geração (ELITISMO).
-//   7. Repetimos os passos 2 a 6 por várias GERAÇÕES. No final, ficamos com a melhor solução.
-//
-// REPRESENTAÇÃO (ver funcoes/solucao.js):
-//   cromossomo = solução = vetor de ids de zona, ex.: [1, 3, 2, 1, 4, ...]
-//   - cada POSIÇÃO do vetor (gene) é uma planta;
-//   - o VALOR do gene é a zona onde essa planta está.
-//
-// Este arquivo NÃO mexe na interface: ela só chama `executarAlgoritmoGenetico`
-// através de servicos/executorAlgoritmos.js (que também mede o tempo de execução).
-
 import { calcularFitness } from '../funcoes/fitness'
 import { calcularMedia } from '../funcoes/metricas'
 
-// Diz ao serviço que este algoritmo já está implementado (a interface passa a liberá-lo).
+// O algoritmo genético tenta encontrar a melhor distribuição de plantas
+// entre as zonas usando evolução por várias gerações.
+//
+// Em cada geração:
+// 1. avaliamos as soluções pelo fitness;
+// 2. escolhemos boas soluções como pais;
+// 3. cruzamos os pais para gerar filhos;
+// 4. aplicamos pequenas mudanças aleatórias (mutação);
+// 5. mantemos algumas das melhores soluções (elitismo).
+
+// Representação de uma solução:
+// cromossomo = vetor de zonas
+// cada posição representa uma planta;
+// o valor armazenado representa a zona escolhida para ela.
+//
+// Exemplo:
+// [1, 2, 2, 3]
+// planta 1 → zona 1
+// planta 2 → zona 2
+// planta 3 → zona 2
+// planta 4 → zona 3
+
 export const DISPONIVEL = true
 
-// Quantos indivíduos "brigam" em cada torneio de seleção.
-// 3 é um valor comum: dá vantagem aos melhores sem eliminar totalmente os piores.
+// Quantos indivíduos participam de cada torneio de seleção
+// Quanto maior o torneio, maior a preferência por soluções melhores
 const TAMANHO_TORNEIO = 3
 
-// ---------------------------------------------------------------------------
-// FUNÇÕES AUXILIARES (cada uma faz uma coisa só)
-// ---------------------------------------------------------------------------
-
-// Sorteia um número inteiro de 0 até (limite - 1). Ex.: sortearInteiro(4) → 0, 1, 2 ou 3.
+// Retorna um número inteiro aleatório entre 0 e limite - 1.
 function sortearInteiro(limite) {
   return Math.floor(Math.random() * limite)
 }
 
-// Sorteia o id de uma zona qualquer.
+// Escolhe aleatoriamente uma zona válida
 function sortearZona(zonas) {
   return zonas[sortearInteiro(zonas.length)].id
 }
 
-// Cria UMA solução aleatória: para cada planta, sorteia uma zona.
+// Cria uma solução inicial atribuindo uma zona aleatória para cada planta.
 function criarSolucaoAleatoria(quantidadePlantas, zonas) {
   return Array.from({ length: quantidadePlantas }, () => sortearZona(zonas))
 }
 
-// SELEÇÃO POR TORNEIO:
-// sorteia alguns indivíduos da população e devolve o MELHOR deles (maior fitness).
-// Assim, os bons têm mais chance de serem escolhidos, mas os ruins ainda podem ganhar às vezes.
+// Seleção por torneio:
+// sorteamos alguns indivíduos e escolhemos o que tiver maior fitness.
+// Assim, as melhores soluções têm mais chance de virar pais,
+// mas soluções piores ainda podem ser escolhidas.
 function selecionarPorTorneio(populacao) {
   let vencedor = populacao[sortearInteiro(populacao.length)]
+
   for (let i = 1; i < TAMANHO_TORNEIO; i += 1) {
     const concorrente = populacao[sortearInteiro(populacao.length)]
+
     if (concorrente.fitness > vencedor.fitness) vencedor = concorrente
   }
+
   return vencedor.solucao
 }
 
-// CROSSOVER DE 1 PONTO:
-// escolhe um ponto de corte e troca o "resto" dos dois pais. Exemplo (corte depois da 3ª posição):
-//   paiA:   [1, 1, 1 | 2, 2, 2]       filho1: [1, 1, 1 | 3, 3, 3]
-//   paiB:   [3, 3, 3 | 3, 3, 3]  →    filho2: [3, 3, 3 | 2, 2, 2]
-// Só acontece com probabilidade `taxaCrossover`; senão os filhos são cópias dos pais.
+// Crossover de 1 ponto:
+// os pais são divididos em um ponto e trocam suas partes.
+
+// Exemplo:
+// paiA:   [1, 1, 1 | 2, 2, 2]
+// paiB:   [3, 3, 3 | 3, 3, 3]
+// filho1: [1, 1, 1 | 3, 3, 3]
+// filho2: [3, 3, 3 | 2, 2, 2]
+//
+// O crossover só acontece quando o sorteio fica dentro da taxa definida.
 function cruzar(paiA, paiB, taxaCrossover) {
   const naoCruza = paiA.length < 2 || Math.random() >= taxaCrossover
+
   if (naoCruza) return [[...paiA], [...paiB]]
 
-  const corte = 1 + sortearInteiro(paiA.length - 1) // de 1 até (tamanho - 1): sempre divide em dois pedaços
+  const corte = 1 + sortearInteiro(paiA.length - 1)
+
   return [
     [...paiA.slice(0, corte), ...paiB.slice(corte)],
     [...paiB.slice(0, corte), ...paiA.slice(corte)],
   ]
 }
 
-// MUTAÇÃO:
-// cada gene tem `taxaMutacao` de chance de trocar de zona (sorteia uma zona nova).
-// Ex.: taxa de 3% → em média, 3 genes a cada 100 mudam.
+// Muta cada gene de acordo com a taxa de mutação.
+//
+// Quando ocorre mutação, a planta recebe uma nova zona aleatória.
+// Isso ajuda o algoritmo a explorar novas soluções.
 function mutar(solucao, taxaMutacao, zonas) {
-  return solucao.map((gene) => (Math.random() < taxaMutacao ? sortearZona(zonas) : gene))
+  return solucao.map((gene) => (
+    Math.random() < taxaMutacao ? sortearZona(zonas) : gene
+  ))
 }
 
-// Ordena do melhor (maior fitness) para o pior. Modifica a própria lista.
+// Ordena a população do maior fitness para o menor
 function ordenarPorFitness(populacao) {
   return populacao.sort((a, b) => b.fitness - a.fitness)
 }
 
-// ---------------------------------------------------------------------------
-// ALGORITMO PRINCIPAL
-// ---------------------------------------------------------------------------
-// ENTRADA: { plantas, zonas, configuracao }  (ver o contrato no executorAlgoritmos.js)
-// SAÍDA:   objeto com a melhor solução, o histórico por geração e métricas.
+// Algoritmo principal
+//
+// Entrada:
+// plantas, zonas e configurações do algoritmo
+//
+// Saída:
+// melhor solução encontrada, fitness, histórico e métricas
 export function executarAlgoritmoGenetico({ plantas, zonas, configuracao }) {
-  const { tamanhoPopulacao, numeroGeracoes, taxaCrossover, taxaMutacao, elitismo } = configuracao
+  const {
+    tamanhoPopulacao,
+    numeroGeracoes,
+    taxaCrossover,
+    taxaMutacao,
+    elitismo,
+  } = configuracao
 
-  // Conta quantas vezes calculamos o fitness (usado na comparação com a Busca Gulosa).
+  // Conta quantas soluções tiveram o fitness calculado
   let avaliacoes = 0
 
-  // Transforma uma solução em { solucao, fitness } para não precisar recalcular a nota depois.
+  // Calcula o fitness de uma solução e guarda os dois valores juntos
   const avaliar = (solucao) => {
     avaliacoes += 1
-    return { solucao, fitness: calcularFitness(solucao, plantas, zonas) }
+
+    return {
+      solucao,
+      fitness: calcularFitness(solucao, plantas, zonas),
+    }
   }
 
-  // PASSO 1 — População inicial: soluções totalmente aleatórias, já com a nota de cada uma.
-  let populacao = Array.from({ length: tamanhoPopulacao }, () =>
-    avaliar(criarSolucaoAleatoria(plantas.length, zonas)),
+  // Cria a primeira população com soluções aleatórias
+  let populacao = Array.from(
+    { length: tamanhoPopulacao },
+    () => avaliar(criarSolucaoAleatoria(plantas.length, zonas)),
   )
 
-  // Guardamos a melhor solução de TODAS as gerações (útil principalmente se o elitismo for 0).
-  let melhor = { solucao: [], fitness: -Infinity }
+  // Guarda a melhor solução encontrada durante todo o algoritmo
+  let melhor = {
+    solucao: [],
+    fitness: -Infinity,
+  }
+
   let geracaoDoMelhor = 1
   const historicoFitness = []
 
   for (let geracao = 1; geracao <= numeroGeracoes; geracao += 1) {
-    // A geração 1 é a população inicial. Nas seguintes, criamos a nova população.
+
+    // A primeira geração já é a população inicial.
+    // Nas demais, criamos uma nova população a partir da anterior.
     if (geracao > 1) {
       const novaPopulacao = []
 
-      // PASSO 2 — Elitismo: os N melhores passam direto, sem alteração (e sem recalcular a nota).
+      // Elitismo:
+      // mantém os melhores indivíduos sem alterar suas soluções
       ordenarPorFitness(populacao)
         .slice(0, elitismo)
         .forEach((individuo) => novaPopulacao.push(individuo))
 
-      // PASSOS 3, 4 e 5 — Seleção → Crossover → Mutação, até a população voltar ao tamanho original.
+      // Repetimos seleção, crossover e mutação
+      // até preencher a nova população.
       while (novaPopulacao.length < tamanhoPopulacao) {
+
         const paiA = selecionarPorTorneio(populacao)
         const paiB = selecionarPorTorneio(populacao)
+
         const filhos = cruzar(paiA, paiB, taxaCrossover)
 
         filhos.forEach((filho) => {
-          // O último filho pode "passar" do tamanho; por isso a verificação.
+
+          // Evita ultrapassar o tamanho definido para a população
           if (novaPopulacao.length < tamanhoPopulacao) {
-            novaPopulacao.push(avaliar(mutar(filho, taxaMutacao, zonas)))
+            novaPopulacao.push(
+              avaliar(mutar(filho, taxaMutacao, zonas))
+            )
           }
         })
       }
@@ -141,32 +178,43 @@ export function executarAlgoritmoGenetico({ plantas, zonas, configuracao }) {
       populacao = novaPopulacao
     }
 
-    // PASSO 6 — Registrar como esta geração se saiu (alimenta o gráfico de evolução do fitness).
+    // Ordena a geração e identifica seu melhor indivíduo
     ordenarPorFitness(populacao)
+
     const melhorDaGeracao = populacao[0]
+
+    // Atualiza a melhor solução geral, caso esta geração tenha melhorado
     if (melhorDaGeracao.fitness > melhor.fitness) {
-      melhor = { solucao: [...melhorDaGeracao.solucao], fitness: melhorDaGeracao.fitness }
+      melhor = {
+        solucao: [...melhorDaGeracao.solucao],
+        fitness: melhorDaGeracao.fitness,
+      }
+
       geracaoDoMelhor = geracao
     }
+
+    // Guarda os dados usados para acompanhar a evolução do algoritmo
     historicoFitness.push({
       geracao,
       melhorFitness: melhorDaGeracao.fitness,
-      fitnessMedio: calcularMedia(populacao.map((individuo) => individuo.fitness)),
+      fitnessMedio: calcularMedia(
+        populacao.map((individuo) => individuo.fitness)
+      ),
     })
   }
 
-  // PASSO 7 — Retornar o resultado respeitando a estrutura esperada pelo serviço.
+  // Retorna os resultados no formato esperado pelo executor.
   return {
     algoritmo: 'genetico',
     melhorSolucao: melhor.solucao,
     melhorFitness: melhor.fitness,
-    fitnessMedio: historicoFitness[historicoFitness.length - 1].fitnessMedio, // média da população final
+    fitnessMedio: historicoFitness[historicoFitness.length - 1].fitnessMedio,
     geracoes: numeroGeracoes,
     historicoFitness,
-    // AJUSTE AQUI: Variáveis adicionais agrupadas dentro de 'metricas' conforme o esqueleto pedia.
-    metricas: { 
-      estadosAvaliados: avaliacoes, // quantas soluções tiveram o fitness calculado
-      geracaoDoMelhor               // geração em que a melhor solução apareceu pela primeira vez
+
+    metricas: {
+      estadosAvaliados: avaliacoes,
+      geracaoDoMelhor,
     },
   }
 }
