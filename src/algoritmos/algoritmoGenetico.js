@@ -31,7 +31,7 @@ const TAMANHO_TORNEIO = 3
 
 // Retorna um número inteiro aleatório entre 0 e limite - 1.
 function sortearInteiro(limite) {
-  return Math.floor(Math.random() * limite) // NOSONAR.
+  return Math.floor(Math.random() * limite) // NOSONAR
 }
 
 // Escolhe aleatoriamente uma zona válida
@@ -71,7 +71,7 @@ function selecionarPorTorneio(populacao) {
 //
 // O crossover só acontece quando o sorteio fica dentro da taxa definida.
 function cruzar(paiA, paiB, taxaCrossover) {
-  const naoCruza = paiA.length < 2 || Math.random() >= taxaCrossover // NOSONAR.
+  const naoCruza = paiA.length < 2 || Math.random() >= taxaCrossover // NOSONAR
 
   if (naoCruza) return [[...paiA], [...paiB]]
 
@@ -88,7 +88,7 @@ function cruzar(paiA, paiB, taxaCrossover) {
 // Quando ocorre mutação, a planta recebe uma nova zona aleatória.
 // Isso ajuda o algoritmo a explorar novas soluções.
 function mutar(solucao, taxaMutacao, zonas) {
-  return solucao.map((gene) => (
+  return solucao.map((gene) => ( // NOSONAR
     Math.random() < taxaMutacao ? sortearZona(zonas) : gene
   ))
 }
