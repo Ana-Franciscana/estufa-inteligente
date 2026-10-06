@@ -9,9 +9,6 @@ const COMPONENTES_FITNESS = [
   { chave: 'temperatura', rotulo: 'Adequação de temperatura' },
   { chave: 'umidade', rotulo: 'Adequação de umidade' },
   { chave: 'luminosidade', rotulo: 'Adequação de luminosidade' },
-  { chave: 'agua', rotulo: 'Eficiência no uso da água' },
-  { chave: 'penalidadeCapacidade', rotulo: 'Penalidade de capacidade', penalidade: true },
-  { chave: 'penalidadeAgua', rotulo: 'Penalidade de excesso de água', penalidade: true },
 ]
 
 function montarMetricas(resultado) {

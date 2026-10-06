@@ -68,7 +68,7 @@ export default function Otimizacao() {
         </div>
       </div>
 
-      <ComparacaoAlgoritmos resultados={resultados} />
+      <ComparacaoAlgoritmos resultados={resultados} plantas={plantasIndividuais} />
     </>
   )
 }
