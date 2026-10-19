@@ -1,7 +1,9 @@
 import { LIMITE_RODADAS, TIPOS_EXPERIMENTO } from '../dados/configuracao'
 import { formatarPercentual } from '../funcoes/formatacao'
 
+// Mostra os valores fracionários como percentuais quando o experimento varia uma taxa.
 function rotularCenario(tipo, valor) {
+  // Valores internos de taxa são frações e precisam virar percentual para aparecer na tela.
   if (tipo.formato === 'percentual') return formatarPercentual(valor)
   return `${valor.toLocaleString('pt-BR')} indivíduos`
 }
@@ -15,6 +17,7 @@ export default function PainelExperimento({
   executando,
   geneticoDisponivel,
 }) {
+  // Usa as definições de experimento para montar as opções apresentadas na tela.
   const experimentos = Object.values(TIPOS_EXPERIMENTO)
 
   return (
@@ -29,7 +32,9 @@ export default function PainelExperimento({
 
       <div className="experimentos-opcoes">
         {experimentos.map((tipo, indice) => {
+          // Marca a opção ativa para que a página saiba qual experimento executar.
           const selecionado = tipo.id === tipoExperimento
+          // Ao clicar, avisa a página para atualizar o experimento selecionado.
           return (
             <button
               key={tipo.id}
@@ -52,6 +57,7 @@ export default function PainelExperimento({
                 <>
                   <span className="experimento-explicacao">{tipo.explicacaoParametro}</span>
                   <span className="experimento-cenarios" aria-label="Cenários fixos">
+                    {/* Estes valores vêm da definição do experimento, não são digitados neste painel. */}
                     {tipo.valoresPadrao.map((valor, cenario) => (
                       <span className="experimento-cenario" key={valor}>
                         <small>Cenário {cenario + 1}</small>
@@ -73,6 +79,7 @@ export default function PainelExperimento({
       <div className="experimento-controles">
         <div className="experimento-repeticoes">
           <label htmlFor="exp-repeticoes" className="form-label">Repetições</label>
+          {/* O campo envia texto à página, que converte esse valor antes de chamar o serviço. */}
           <input
             id="exp-repeticoes"
             type="number"
@@ -88,6 +95,7 @@ export default function PainelExperimento({
             Padrão adotado pelo projeto: 10 repetições.
           </span>
         </div>
+        {/* A página inicia a execução; enquanto ela roda, o botão fica desativado. */}
         <button type="button" className="btn btn-primary" onClick={aoExecutar} disabled={executando}>
           {executando ? 'Executando…' : 'Executar experimento'}
         </button>

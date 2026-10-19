@@ -12,20 +12,25 @@ import { executarExperimento } from '../servicos/executorExperimentos'
 import { obterStatusAlgoritmos, STATUS_EXECUCAO } from '../servicos/executorAlgoritmos'
 
 export default function Experimentos() {
+  // Obtém os dados da estufa e a função que guarda o último experimento concluído.
   const { plantasIndividuais, zonas, experimento, registrarExperimento } = useEstufa()
+  // Guarda a opção escolhida, o número de repetições e o estado da execução.
   const [tipoExperimento, setTipoExperimento] = useState('mutacao')
   const [repeticoes, setRepeticoes] = useState(String(RODADAS_PADRAO))
   const [executando, setExecutando] = useState(false)
   const [retorno, setRetorno] = useState(null)
 
   const mudarTipo = (tipoId) => {
+    // Ao trocar o tipo, limpa mensagens da tentativa anterior.
     setTipoExperimento(tipoId)
     setRetorno(null)
   }
 
   const executar = async () => {
+    // Envia ao serviço os valores previstos para o cenário e converte repetições em número.
     setExecutando(true)
     setRetorno(null)
+    // Os cenários usam os valores previstos na configuração; repetições vêm do campo editável.
     const resposta = await executarExperimento({
       tipoExperimento,
       valores: TIPOS_EXPERIMENTO[tipoExperimento].valoresPadrao,
@@ -33,23 +38,30 @@ export default function Experimentos() {
       plantas: plantasIndividuais,
       zonas,
     })
+    // Guarda o experimento no contexto somente se todas as execuções tiverem sido concluídas.
     if (resposta.status === STATUS_EXECUCAO.CONCLUIDO) registrarExperimento(resposta.experimento)
     setRetorno(resposta)
     setExecutando(false)
   }
 
+  // Separa as informações do último experimento salvo e o tipo que deve aparecer na tela.
   const tipoExecutado = experimento ? TIPOS_EXPERIMENTO[experimento.tipoExperimento] : null
   const tipoVisivel = tipoExecutado ?? TIPOS_EXPERIMENTO[tipoExperimento]
+  // Interpreta os estados devolvidos pelo serviço para exibir avisos ou erros.
   const aguardando = retorno?.status === STATUS_EXECUCAO.AGUARDANDO_ALGORITMO
   const falhou = retorno && retorno.status !== STATUS_EXECUCAO.CONCLUIDO && !aguardando
+  // Consulta se o algoritmo genético pode ser usado nos experimentos escolhidos.
   const geneticoDisponivel = obterStatusAlgoritmos().find((algoritmo) => algoritmo.id === ALGORITMOS.genetico.id)?.disponivel
 
+  // Acrescenta a cada linha a média de estados avaliados, quando as rodadas têm esse dado.
   const linhasGraficos = experimento?.linhas.map((linha) => {
+    // Algumas execuções podem não fornecer esse contador; mantém só os números válidos.
     const avaliacoes = linha.execucoes
       ?.map((execucao) => execucao.estadosAvaliados)
       .filter(Number.isFinite) ?? []
     return { ...linha, estadosAvaliadosMedio: calcularMedia(avaliacoes) }
   }) ?? []
+  // Decide qual conjunto de gráficos mostrar e se existe média de estados para comparar.
   const compararAlgoritmos = experimento?.tipoExperimento === 'algoritmos'
   const mostrarEstados = linhasGraficos.some((linha) => Number.isFinite(linha.estadosAvaliadosMedio))
 
@@ -88,6 +100,7 @@ export default function Experimentos() {
 
         <TabelaExperimento experimento={experimento} />
 
+        {/* Os gráficos recebem as linhas resumidas que vieram do serviço de experimentos. */}
         <div className="row g-4">
           <div className="col-xl-6">
             <GraficoComparacao
