@@ -56,8 +56,7 @@ assert.equal(
 // O teste espera 200 gerações e um registro de fitness para cada uma.
 assert.equal(resultado.geracoes, 200)
 assert.equal(resultado.historicoFitness.length, 200)
-// Esta asserção espera o contador com o nome avaliacoesFitness.
-// Hoje o algoritmo devolve o contador em metricas.estadosAvaliados, então o teste falha aqui.
-assert.equal(resultado.metricas.avaliacoesFitness, 20000)
+// A população inicial é avaliada por completo; depois, o elitismo preserva 2 dos 100 indivíduos.
+assert.equal(resultado.metricas.estadosAvaliados, 100 + (200 - 1) * (100 - 2))
 
 console.log('Teste do Algoritmo Genético com a instância-base: passou.')

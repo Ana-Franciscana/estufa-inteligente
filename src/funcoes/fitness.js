@@ -50,12 +50,12 @@ export function avaliarLuminosidade(planta, zona) {
   return 1 - distancia / MAIOR_DISTANCIA_LUMINOSIDADE
 }
 
-// Calcula que parte da água disponível está sendo usada, sem deixar o aproveitamento passar de 1.
+// Compara a água disponível com a quantidade necessária. Mais água nunca reduz esta nota;
+// quando não há plantas, a zona não recebe pontos de água.
 export function avaliarAgua(consumoTotal, aguaDisponivel) {
-  // Sem água disponível, não há parcela de aproveitamento para somar à nota.
-  if (aguaDisponivel <= 0) return 0
-  // Usa o menor valor entre consumo e disponibilidade antes de dividir pelo total disponível.
-  return Math.min(consumoTotal, aguaDisponivel) / aguaDisponivel
+  if (consumoTotal <= 0 || aguaDisponivel <= 0) return 0
+  // A zona recebe a nota máxima quando tem água suficiente; senão, recebe uma fração proporcional.
+  return Math.min(1, aguaDisponivel / consumoTotal)
 }
 
 // A diferença positiva entre ocupação e capacidade é multiplicada pelo peso da penalidade.
@@ -86,7 +86,7 @@ export function detalharFitness(solucao, plantas, zonas) {
       detalhe.umidade += pesos.umidade * avaliarUmidade(planta, zona)
       detalhe.luminosidade += pesos.luminosidade * avaliarLuminosidade(planta, zona)
     })
-    // A água aproveitada aumenta a nota; excessos de água ou lotação são descontados depois.
+    // Água suficiente contribui para a nota; a falta e a lotação também são refletidas nas penalidades.
     detalhe.agua += pesoAgua * avaliarAgua(consumoAgua, zona.aguaDisponivel)
     detalhe.penalidadeCapacidade += calcularPenalidadeCapacidade(ocupacao, zona.capacidade)
     detalhe.penalidadeAgua += calcularPenalidadeAgua(consumoAgua, zona.aguaDisponivel)
@@ -95,9 +95,7 @@ export function detalharFitness(solucao, plantas, zonas) {
   // Soma as contribuições ambientais e de água e subtrai as duas penalidades.
   const total = detalhe.temperatura + detalhe.umidade + detalhe.luminosidade + detalhe.agua
     - detalhe.penalidadeCapacidade - detalhe.penalidadeAgua
-  // Na execução-base: 4.8 + 3.6 + 3.6 + 0.9083 de água, sem penalidades, dá 12.9083...
-  // A interface exibe esse resultado arredondado como 12.91.
-  // Mantém os detalhes e acrescenta a soma final no campo total.
+  // A mesma soma é usada para todos os algoritmos e os detalhes alimentam a interface e os gráficos.
   return { ...detalhe, total }
 }
 
