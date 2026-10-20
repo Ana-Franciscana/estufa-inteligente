@@ -7,10 +7,6 @@ import { calcularMedia } from '../funcoes/metricas'
 
 export const DISPONIVEL = true
 
-// A seleção usada aqui é sempre por torneio, com três participantes.
-// O algoritmo não consulta configuracao.tipoSelecao; a escolha da tela ainda não muda esse método.
-const TAMANHO_TORNEIO = 3
-
 // Math.random() gera um valor de 0 até antes de 1.
 // Multiplicar por limite cria uma faixa de índices e Math.floor() arredonda para baixo.
 function sortearInteiro(limite) {
@@ -31,13 +27,13 @@ function criarSolucaoAleatoria(quantidadePlantas, zonas) {
 
 // Sorteia participantes e escolhe como pai aquele que tiver o maior fitness.
 // Como o sorteio pode incluir qualquer indivíduo, uma solução mais fraca também pode vencer.
-function selecionarPorTorneio(populacao) {
+function selecionarPorTorneio(populacao, tamanhoTorneio) {
   // O primeiro sorteado vira vencedor provisório e garante que já exista alguém para comparar.
   let vencedor = populacao[sortearInteiro(populacao.length)]
 
   // Os outros dois participantes são sorteados um de cada vez.
   // Cada sorteio pode repetir um indivíduo que já tenha participado.
-  for (let i = 1; i < TAMANHO_TORNEIO; i += 1) {
+  for (let i = 1; i < tamanhoTorneio; i += 1) {
     const concorrente = populacao[sortearInteiro(populacao.length)]
 
     // Fitness maior significa nota melhor e substitui o vencedor provisório.
@@ -97,6 +93,8 @@ export function executarAlgoritmoGenetico({ plantas, zonas, configuracao }) {
     taxaMutacao,
     // Quantos dos melhores indivíduos passam à geração seguinte sem alteração.
     elitismo,
+    // Quantos indivíduos participam de cada disputa para escolher um pai.
+    tamanhoTorneio,
   } = configuracao
 
   // Conta as avaliações de soluções, incluindo a população inicial e os filhos.
@@ -149,8 +147,8 @@ export function executarAlgoritmoGenetico({ plantas, zonas, configuracao }) {
       while (novaPopulacao.length < tamanhoPopulacao) {
 
         // Cada torneio escolhe um pai da população anterior.
-        const paiA = selecionarPorTorneio(populacao)
-        const paiB = selecionarPorTorneio(populacao)
+        const paiA = selecionarPorTorneio(populacao, tamanhoTorneio)
+        const paiB = selecionarPorTorneio(populacao, tamanhoTorneio)
 
         // Com a chance taxaCrossover, mistura os pais; caso contrário, devolve cópias deles.
         const filhos = cruzar(paiA, paiB, taxaCrossover)

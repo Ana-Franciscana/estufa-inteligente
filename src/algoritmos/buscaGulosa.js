@@ -49,20 +49,13 @@ function validarEntrada(plantas, zonas) {
   if (erros.length > 0) throw new Error(erros.join(' '))
 }
 
-// Cria o registro usado pela busca para guardar cada alternativa de distribuição.
-function criarEstado(solucao, profundidade, custo, heuristica, ordem) {
-  // solucao guarda as zonas; profundidade conta plantas alocadas;
-  // custo conta alocações; heuristica ordena alternativas; ordem desempata.
-  return { solucao, profundidade, custo, heuristica, ordem }
+// Guarda a distribuição candidata e a nota usada para compará-la às demais zonas.
+function criarEstado(solucao, heuristica) {
+  return { solucao, heuristica }
 }
 
-// A mesma lista sempre vira a mesma chave de texto, usada pelo Set de estados já vistos.
-function chaveEstado(solucao) {
-  return JSON.stringify(solucao)
-}
-
-// Começa com a nota da parte já alocada e estima a contribuição ambiental das plantas restantes.
-// A estimativa não calcula para as plantas restantes o efeito conjunto de água ou capacidade.
+// Soma o fitness parcial e uma estimativa ambiental das plantas ainda não alocadas.
+// Água e capacidade futuras não são estimadas até cada planta entrar na distribuição.
 function calcularHeuristica(solucao, profundidade, plantas, zonas) {
   // O fitness parcial avalia o que já está na solução, inclusive seus efeitos atuais de água e capacidade.
   const fitnessAtual = calcularFitness(solucao, plantas, zonas)
@@ -88,138 +81,63 @@ function calcularHeuristica(solucao, profundidade, plantas, zonas) {
   return fitnessAtual + potencialRestante
 }
 
-// Devolve a posição do estado mais promissor que será retirado da fronteira.
-function indiceMaisPromissor(fronteira) {
-  let melhorIndice = 0
-  // Compara cada candidato com o estado que até agora ficou em primeiro lugar.
-  for (let indice = 1; indice < fronteira.length; indice += 1) {
-    const candidato = fronteira[indice]
-    const melhor = fronteira[melhorIndice]
-    // Maior heurística vence; em empate, ganha maior profundidade e depois menor ordem.
-    if (
-      candidato.heuristica > melhor.heuristica
-      || (candidato.heuristica === melhor.heuristica && candidato.profundidade > melhor.profundidade)
-      || (candidato.heuristica === melhor.heuristica
-        && candidato.profundidade === melhor.profundidade
-        && candidato.ordem < melhor.ordem)
-    ) {
-      melhorIndice = indice
-    }
-  }
-  return melhorIndice
-}
-
 export function executarBuscaGulosa({ plantas, zonas }) {
   // plantas tem uma entrada por planta física; zonas contém os destinos possíveis.
   // Se houver dados inválidos, a validação interrompe a execução com uma mensagem.
   validarEntrada(plantas, zonas)
 
-  // A ordem de criação desempata estados com a mesma heurística e profundidade.
-  let proximaOrdem = 0
-  // Cria uma posição por planta; null indica que essa posição ainda não tem zona.
-  const solucaoInicial = Array(plantas.length).fill(null)
-  // A fronteira guarda alternativas pendentes, para a busca poder escolher qual explorar primeiro.
-  const fronteira = [criarEstado(
-    solucaoInicial,
-    0,
-    0,
-    // Avalia o início sem alocações para estimar seu potencial.
-    calcularHeuristica(solucaoInicial, 0, plantas, zonas),
-    proximaOrdem++,
-  )]
-  // Registra o estado inicial desde já para que ele também não seja criado de novo.
-  const gerados = new Set([chaveEstado(solucaoInicial)])
-  // A heurística do estado inicial já foi calculada, por isso começa com uma avaliação.
-  // Na instância-base, o contador final 49 representa 49 estados com heurística calculada.
-  let estadosAvaliados = 1
-  // O estado inicial também conta como gerado; ainda não foi expandido.
-  let estadosGerados = 1
-  // Conta estados incompletos retirados da fronteira e expandidos em busca de sucessores.
-  let estadosExpandidos = 0
-  // Conta candidatos repetidos encontrados antes de calcular sua heurística.
-  let estadosDescartadosPorDuplicidade = 0
-  // Guarda uma descrição de cada estado selecionado depois do início.
+  // Começa com todas as plantas ainda sem destino.
+  let solucao = Array(plantas.length).fill(null)
+  let estadosAvaliados = 0
+  let estadosGerados = 0
   const passos = []
 
-  while (fronteira.length > 0) {
-    // Busca o índice prioritário e splice remove esse único estado da lista.
-    // A desestruturação [estado] recebe o item removido, não o índice.
-    const [estado] = fronteira.splice(indiceMaisPromissor(fronteira), 1)
+  // Em cada passo, cria uma possibilidade por zona e mantém a de maior heurística.
+  // Assim avalia quatro alternativas por planta nesta estufa e não guarda uma fronteira exponencial.
+  for (let indicePlanta = 0; indicePlanta < plantas.length; indicePlanta += 1) {
+    let melhorEstado = null
 
-    if (estado.profundidade > 0) {
-      // A última posição preenchida é profundidade - 1; registra onde essa planta foi colocada.
-      const indiceAlocado = estado.profundidade - 1
-      const zonaEscolhida = zonas.find((zona) => zona.id === estado.solucao[indiceAlocado])
-      passos.push({
-        passo: passos.length + 1,
-        planta: plantas[indiceAlocado].nome,
-        zonaEscolhida: zonaEscolhida.nome,
-        fitnessParcial: calcularFitness(estado.solucao, plantas, zonas),
-        heuristica: estado.heuristica,
-        estadosNaFronteira: fronteira.length,
-      })
-    }
-
-    // Quando a profundidade alcança o número de plantas, todas as posições foram preenchidas.
-    if (estado.profundidade === plantas.length) {
-      // A primeira solução completa escolhida encerra a busca sem comparar todas as demais.
-      // Por isso, mesmo o fitness 12.91 da instância-base não prova que seja o ótimo global.
-      const errosSolucao = validarSolucao(estado.solucao, plantas, zonas)
-      if (errosSolucao.length > 0) throw new Error(errosSolucao.join(' '))
-
-      return {
-        // O serviço usa o identificador do algoritmo e a distribuição encontrada.
-        algoritmo: 'gulosa',
-        melhorSolucao: estado.solucao,
-        // Esta é a nota oficial da solução completa, não a heurística estimada.
-        melhorFitness: calcularFitness(estado.solucao, plantas, zonas),
-        // Conta estados cuja heurística foi calculada; não conta plantas ou etapas da solução.
-        estadosAvaliados,
-        metricas: {
-          // passos descreve as escolhas; profundidade é o número de plantas alocadas.
-          passos,
-          profundidadeSolucao: estado.profundidade,
-          // Gerados inclui o início; expandidos conta estados que produziram sucessores.
-          estadosGerados,
-          estadosExpandidos,
-          // Inclui alternativas repetidas descartadas antes de serem avaliadas.
-          estadosDescartadosPorDuplicidade,
-        },
-      }
-    }
-
-    // As plantas são alocadas na ordem recebida; profundidade aponta para a próxima posição livre.
-    const indicePlanta = estado.profundidade
-    // Este estado incompleto será expandido ao tentar todas as zonas possíveis.
-    estadosExpandidos += 1
-
-    // Testa cada zona e monta a distribuição que resultaria de alocar nela a próxima planta.
     zonas.forEach((zona) => {
-      // Copia o estado antes de preencher a posição da planta atual.
-      const sucessorSolucao = [...estado.solucao]
-      sucessorSolucao[indicePlanta] = zona.id
-      // A chave representa a lista inteira; o Set encontra repetidos sem percorrer os demais estados.
-      const chave = chaveEstado(sucessorSolucao)
-      if (gerados.has(chave)) {
-        // Conta e descarta uma distribuição que já apareceu.
-        estadosDescartadosPorDuplicidade += 1
-        return
-      }
-
-      // Marca a alternativa como gerada e atualiza seu contador antes de avaliá-la.
-      gerados.add(chave)
-      estadosGerados += 1
-      // Uma alocação aumenta a profundidade em um.
-      const profundidade = estado.profundidade + 1
-      // A heurística é calculada uma vez para cada estado novo e contado como avaliação.
-      const heuristica = calcularHeuristica(sucessorSolucao, profundidade, plantas, zonas)
+      const proximaSolucao = [...solucao]
+      proximaSolucao[indicePlanta] = zona.id
+      const estado = criarEstado(
+        proximaSolucao,
+        calcularHeuristica(proximaSolucao, indicePlanta + 1, plantas, zonas),
+      )
       estadosAvaliados += 1
-      // Cada alocação soma 1 ao custo, que não define prioridade; a ordem de criação desempata.
-      fronteira.push(criarEstado(sucessorSolucao, profundidade, estado.custo + 1, heuristica, proximaOrdem++))
+      estadosGerados += 1
+
+      // Em empate, conserva a primeira zona na ordem fixa da lista.
+      if (melhorEstado === null || estado.heuristica > melhorEstado.heuristica) melhorEstado = estado
     })
 
+    solucao = melhorEstado.solucao
+    passos.push({
+      passo: indicePlanta + 1,
+      planta: plantas[indicePlanta].nome,
+      zonaEscolhida: zonas.find((zona) => zona.id === solucao[indicePlanta]).nome,
+      fitnessParcial: calcularFitness(solucao, plantas, zonas),
+      heuristica: melhorEstado.heuristica,
+      alternativasAvaliadas: zonas.length,
+    })
   }
 
-  // Se não restar alternativa antes de completar todas as posições, não há solução para devolver.
-  throw new Error('A busca terminou sem encontrar uma distribuição completa válida.')
+  // Confere que cada planta recebeu uma zona válida antes de devolver o resultado.
+  const errosSolucao = validarSolucao(solucao, plantas, zonas)
+  if (errosSolucao.length > 0) throw new Error(errosSolucao.join(' '))
+
+  return {
+    algoritmo: 'gulosa',
+    melhorSolucao: solucao,
+    melhorFitness: calcularFitness(solucao, plantas, zonas),
+    // Estados avaliados é uma métrica observada, não um parâmetro de configuração.
+    estadosAvaliados,
+    metricas: {
+      passos,
+      profundidadeSolucao: plantas.length,
+      estadosGerados,
+      estadosExpandidos: plantas.length,
+      estadosDescartadosPorDuplicidade: 0,
+    },
+  }
 }
