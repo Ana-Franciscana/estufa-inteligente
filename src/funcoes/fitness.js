@@ -1,3 +1,6 @@
+//ESSE ARQUIVO RECEBE O VETOR DE 12 NÚMEROS (A DISTRIBUÇÃO DE PLANTAS) E CALCULA O FITNESS
+
+
 // Fitness é a nota de uma distribuição completa ou parcial.
 // Quanto maior a nota, melhor a solução segundo os critérios usados pelo projeto.
 // Os dois algoritmos chamam esta mesma avaliação para comparar suas soluções.
@@ -13,6 +16,13 @@ const valoresLuminosidade = Object.values(NIVEIS_LUMINOSIDADE).map((nivel) => ni
 // A diferença entre o maior e o menor nível vira a escala máxima para comparar luminosidades.
 const MAIOR_DISTANCIA_LUMINOSIDADE = Math.max(...valoresLuminosidade) - Math.min(...valoresLuminosidade)
 
+
+
+
+
+//ESSA FUNÇÃO CALCULA, EM NÚMEROS BRUTOS, O TAMANHO DO ERRO CLIMÁTICO;
+//OU SEJA, VERIFICA SE A CONDIÇÃO DA ESTUFA FICOU ABAIXO DO MÍNIMO OU ACIMA DO MÁXIMO QUE A PLANTA AGUENTA
+
 // Mede o quanto o valor ficou fora do intervalo que a planta aceita.
 function distanciaAoIntervalo(valor, minimo, maximo) {
   // Se ficou abaixo, conta a distância até o mínimo permitido.
@@ -23,11 +33,24 @@ function distanciaAoIntervalo(valor, minimo, maximo) {
   return 0
 }
 
+
+
+
+
+
+//ESSA FUNÇÃO PEGA O TAMANHO DO ERRO DA FUNÇÃO ANTERIOR E TRANSFORMA ESSE ERRO EM UMA 
+//NOTA DE CLIMA QUE VARIA ENTRE 0.0 (HORRÍVEL) E 1.0 (PERFEITO)
+
 // Converte a distância em uma nota: distância zero vale 1 e a tolerância chega a 0.
 function pontuarPorTolerancia(distancia, tolerancia) {
   // Se a conta ficar abaixo de zero, Math.max mantém a nota no mínimo em 0.
   return Math.max(0, 1 - distancia / tolerancia)
 }
+
+
+
+
+
 
 // Compara a temperatura da zona com a faixa da planta e usa a tolerância de temperatura.
 export function avaliarTemperatura(planta, zona) {
@@ -36,19 +59,26 @@ export function avaliarTemperatura(planta, zona) {
   return pontuarPorTolerancia(distancia, PARAMETROS_FITNESS.toleranciaTemperatura)
 }
 
+
+
 // Aplica o mesmo cálculo à umidade, usando a faixa e a tolerância próprias desse critério.
 export function avaliarUmidade(planta, zona) {
   const distancia = distanciaAoIntervalo(zona.umidade, planta.umidadeMinima, planta.umidadeMaxima)
   return pontuarPorTolerancia(distancia, PARAMETROS_FITNESS.toleranciaUmidade)
 }
 
-// O texto, como "baixa" ou "alta", é usado para buscar o número associado na configuração.
+
+
+//Calcula a nota de luminosidade. O texto, como "baixa" ou "alta", é usado para buscar o número associado na configuração.
 export function avaliarLuminosidade(planta, zona) {
   // Math.abs transforma a diferença em distância positiva, independentemente da ordem dos níveis.
   const distancia = Math.abs(NIVEIS_LUMINOSIDADE[planta.luminosidade].valor - NIVEIS_LUMINOSIDADE[zona.luminosidade].valor)
   // Divide pela maior distância possível e subtrai de 1: níveis iguais recebem 1.
   return 1 - distancia / MAIOR_DISTANCIA_LUMINOSIDADE
 }
+
+
+
 
 // Compara a água disponível com a quantidade necessária. Mais água nunca reduz esta nota;
 // quando não há plantas, a zona não recebe pontos de água.
@@ -58,18 +88,30 @@ export function avaliarAgua(consumoTotal, aguaDisponivel) {
   return Math.min(1, aguaDisponivel / consumoTotal)
 }
 
+
+
+//ESSA FUNÇÃO CALCULA A MULTA POR EXCESSO DE LOTAÇÃO EM UMA ZONA
 // A diferença positiva entre ocupação e capacidade é multiplicada pelo peso da penalidade.
 export function calcularPenalidadeCapacidade(ocupacao, capacidade) {
   // Math.max(0, ...) zera a diferença quando a zona ainda tem vagas.
   return Math.max(0, ocupacao - capacidade) * PARAMETROS_FITNESS.penalidadeCapacidade
 }
 
+
+
+//CALCULA MULTA SE FALTAR ÁGUA NA ZONA
 // Calcula o excesso de litros e o multiplica pelo peso definido para a penalidade de água.
 export function calcularPenalidadeAgua(consumoTotal, aguaDisponivel) {
   // Quando o consumo cabe na água disponível, o excesso e a penalidade ficam em zero.
   return Math.max(0, consumoTotal - aguaDisponivel) * PARAMETROS_FITNESS.penalidadeAgua
 }
 
+
+
+
+//ESSA É A FUNÇÃO GERENTE DO ARQUIVO.
+//ELA CRIA O OBJETO ZERADO detalhe E CHAMA A FUNÇÃO agruparPlantasPorZona
+//DEPOIS ELA FAZ UM LAÇO: PASSA DE ZONA EM ZONA E PARA CADA PLANTA. CALCULA AS NOTAS DE CLIMA E TAAMBÉM OS BÔNUS DE ÁGUA E AS MULTAS, SOANDO E SUBTRAINDO TUDO NO FINAL
 // Devolve a nota dividida em partes para a interface poder mostrar de onde veio o total.
 export function detalharFitness(solucao, plantas, zonas) {
   // Os pesos controlam a importância dos critérios ambientais e da água.
@@ -98,6 +140,14 @@ export function detalharFitness(solucao, plantas, zonas) {
   // A mesma soma é usada para todos os algoritmos e os detalhes alimentam a interface e os gráficos.
   return { ...detalhe, total }
 }
+
+
+
+
+
+
+//ESSA FUNÇÃO SERVE COMO UM ATALHO RÁPIDO DE NOTA PARA O ALGORITMO DE BUSCA. O ALGORITMO SÓ PRECISA DE UM NÚMERO LIMPO
+//ELA CHAMA detalharFitness, joga os detalhes no lixo e extraai apenas o número da nota.
 
 // Os algoritmos usam este atalho quando precisam somente do número da nota.
 export function calcularFitness(solucao, plantas, zonas) {

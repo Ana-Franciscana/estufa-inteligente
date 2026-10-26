@@ -1,3 +1,4 @@
+//ZONAS.JS SERVE PARA O SISTEMA SABER COMO SÃO AS ZONAS (AS ESTUFAS GERAIS QUE ELE VAI GERENCIAR)
 // INSTÂNCIA-BASE dos experimentos. As quatro zonas permanecem fixas na interface.
 // Para um estudo futuro, as características do cenário podem ser alteradas diretamente aqui.
 export const ZONAS_INICIAIS = [

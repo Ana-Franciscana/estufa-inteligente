@@ -1,3 +1,5 @@
+//PLANTAS.JS CRIA O CATÁLOGO COM AS REGRAS DE BEM-ESTAR DAS PLANTAS
+
 // Dados iniciais de modelagem. NÃO são dados científicos definitivos:
 // serão validados/referenciados durante a elaboração do relatório.
 // `quantidade` indica quantas plantas desse tipo existem para distribuir.

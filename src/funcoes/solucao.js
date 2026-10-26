@@ -1,5 +1,6 @@
 
-// Transforma o catálogo em uma lista com uma entrada para cada planta física.
+//FUNÇÃO QUE RECEBE A LISTA DE 6 ESPÉCIES E TRANSFORMA O CATÁLOGO EM UMA LISTA REAL DE 12 OBJETOS INDIVIDUAIS
+//ELA É USADA NO ARQUIVO main.js
 export function expandirPlantas(plantas) {
   return plantas
     // flatMap percorre os tipos e cria uma cópia para cada unidade indicada em quantidade.
@@ -8,6 +9,15 @@ export function expandirPlantas(plantas) {
     // Acrescenta o índice de cada posição, que corresponde à posição da planta na solução.
     .map((planta, indice) => ({ ...planta, indice }))
 }
+
+
+
+
+
+//FUNÇAÕ QUE PEGA AS 12 PLANTAS INDIVIDUAIS E MONTA UMA ESTRUTURA PRA DESCOBRIR
+//QUANTAS PLANTAS, QUANTA ÁGUA E QUANTO ESPAÇO ESTÃO SENDO GASTOS EM CADA UMA DAS 4 ZONAS.
+//ELA É USADA EM FITNESS.JS DENTRO DA FUNÇÃO detalharFitness
+//TAMBÉM É USADA EM main.js DENTRO DA FUNÇÃO prepararResultado PARA DESCOBRIR QUAIS PLANTINHAS DEVEM SER DESENHADAS COM OS EMOJIS
 
 // A solução guarda um id de zona em cada posição, na mesma ordem de plantasIndividuais.
 export function agruparPlantasPorZona(solucao, plantasIndividuais, zonas) {
@@ -33,6 +43,14 @@ export function agruparPlantasPorZona(solucao, plantasIndividuais, zonas) {
   // Devolve um grupo por zona, com plantas, água consumida e ocupação calculadas.
   return grupos
 }
+
+
+
+
+
+
+//ESSA FUNÇÃO SERVE PARA A INTERFACE DO SITE. ELA CRIA UM RELATÓRIO VISUAL MAIS AMIGÁVEL PARA SER EXIBIDO PARA O USUÁRIO
+//ELA É USADA EM main.js DENTRO DAS FUNÇÕES QUE CONSTROEM O HTML DA TELA
 
 // Resume uma lista de plantas contando quantas têm o mesmo nome.
 export function resumirPlantasPorTipo(plantasDaZona) {
