@@ -14,6 +14,7 @@ export const PARAMETROS_PADRAO_GENETICO = {
   taxaMutacao: 0.03, // chance de mudar o destino de cada planta
   elitismo: 2, // melhores soluções copiadas sem alteração para a geração seguinte
   tipoSelecao: 'torneio',
+  tamanhoTorneio: 3, // participantes comparados para escolher cada pai
 }
 
 // Estes pesos preservam a função de fitness já usada pelos dois algoritmos.

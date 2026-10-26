@@ -29,8 +29,8 @@ export const CENARIOS = {
   ),
   menosAgua: criarCenario(
     'menosAgua',
-    'Menos água (−20%)',
-    0.8,
-    'Nesta simulação, reduzimos em 20% a água disponível em todas as zonas. Isso permite analisar se os algoritmos conseguem encontrar distribuições adequadas diante de uma limitação maior de água. As demais características da estufa permanecem iguais.',
+    'Escassez de água (−80%)',
+    0.2,
+    'Nesta simulação acadêmica, resta 20% da água original em cada zona. O total é 56 L/dia, abaixo dos 68 L/dia de consumo das 12 plantas, para que a limitação de água apareça no modelo. Plantas, condições e capacidades continuam iguais.',
   ),
 }

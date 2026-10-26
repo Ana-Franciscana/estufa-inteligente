@@ -38,9 +38,19 @@ h1, .cabecalho-secao h2 { font-family: Georgia, serif; font-weight: 500; letter-
 .cabecalho-secao { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 18px; }
 .cabecalho-secao h2 { margin: 0 0 7px; font-size: clamp(1.8rem, 4vw, 2.25rem); line-height: 1.15; }
 .texto-suave { font-size: .91rem; }
+.configuracao { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.configuracao article { display: grid; gap: 5px; padding: 13px; border: 1px solid var(--border); border-radius: 12px; background: #fff; }
+.configuracao article b { color: var(--muted); font-size: .72rem; }
+.configuracao article strong { color: var(--green); font-size: 1rem; }
+.configuracao article span { color: var(--muted); font-size: .72rem; line-height: 1.4; }
 .botoes-cenarios { display: flex; flex-wrap: wrap; gap: 9px; }
-.botao-cenario { padding: 10px 16px; border: 1px solid var(--border); border-radius: 999px; background: #fff; color: var(--green); font-weight: 600; cursor: pointer; }
+.botao-cenario { display: grid; flex: 1 1 290px; gap: 8px; padding: 14px; border: 1px solid var(--border); border-radius: 14px; background: #fff; color: #29352b; text-align: left; cursor: pointer; }
+.botao-cenario > b { color: var(--green); font-size: .9rem; }
+.botao-cenario > span { color: var(--muted); font-size: .73rem; font-weight: 400; line-height: 1.45; }
+.botao-cenario .litros-cenario { color: #394a34; font-weight: 700; }
 .botao-cenario:hover, .botao-cenario.selecionado { border-color: var(--green); background: var(--green); color: #fff; }
+.botao-cenario:hover > b, .botao-cenario.selecionado > b, .botao-cenario:hover .litros-cenario, .botao-cenario.selecionado .litros-cenario { color: #fff; }
+.botao-cenario:hover > span, .botao-cenario.selecionado > span { color: #edf2e8; }
 .descricao-cenario { max-width: 850px; margin: 15px 0 7px; line-height: 1.55; font-size: .88rem; }
 .nota-cenario, .nota-estufa, .nota-aleatoriedade { margin: 8px 0 13px; color: var(--muted); font-size: .78rem; line-height: 1.5; }
 .agua-cenario { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; margin-top: 13px; }
@@ -51,6 +61,7 @@ h1, .cabecalho-secao h2 { font-family: Georgia, serif; font-weight: 500; letter-
 .estufa-titulo { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 0 2px 11px; }
 .estufa-titulo h3 { margin: 0; font-family: Georgia, serif; font-size: 1.15rem; font-weight: 500; }
 .estufa-titulo span { color: var(--green); font-size: .8rem; font-weight: 700; }
+.rotulo-melhor { margin: -5px 2px 10px; color: var(--muted); font-size: .7rem; }
 .estufa-shell { position: relative; padding: 20px 12px 14px; border: 2px solid #bdcda9; border-top: 5px solid var(--green); border-radius: 48% 48% 16px 16px / 7% 7% 16px 16px; background: linear-gradient(180deg, #e7f0e2 0%, #f5f6ed 27%, #f1eadb 100%); box-shadow: inset 0 0 0 5px #ffffff72; }
 .estufa-shell::before { position: absolute; z-index: 0; top: 18px; bottom: 10px; left: 50%; width: 2px; background: #c5d3b6; content: ""; }
 .estufa-arco { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; gap: 10px; height: 28px; color: #71865c; font-size: .61rem; font-weight: 700; letter-spacing: .15em; }
@@ -109,7 +120,7 @@ footer { padding: 23px; border-top: 1px solid var(--border); color: var(--muted)
   .topo { height: 60px; padding: 0 17px; }
   .pagina { padding: 0 16px; }
   .intro { padding: 43px 0 35px; }
-  .algoritmos-intro, .resultados, .graficos { grid-template-columns: 1fr; }
+  .algoritmos-intro, .configuracao, .resultados, .graficos { grid-template-columns: 1fr; }
   .agua-cenario { grid-template-columns: 1fr 1fr; }
   .cabecalho-secao { align-items: flex-start; flex-direction: column; }
   .botoes-execucao { align-items: stretch; flex-direction: column; }
