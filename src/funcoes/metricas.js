@@ -1,5 +1,11 @@
+//A UNICA FUNÇÃO DESSE ARQUIVO É PROCESSAR ESTATÍSTICAS DE DESEMPENHO E CRONOMETRAR OS ALGORITMOS
+//LÉSSAS FUNÇÕES SÃO USADAS NO main.js
+
 // Estas funções resumem listas de resultados; sem valores, as métricas devolvem null.
 
+
+
+//SOMA TODOS OS Nº DE UMA LISTA E DIVIDE PELA QUANTIDADE PARA ACHAR A MÉDIA
 // Soma todos os valores e divide pelo número deles para calcular a média.
 export function calcularMedia(valores) {
   // Não divide por zero: sem itens, não existe média.
@@ -8,10 +14,17 @@ export function calcularMedia(valores) {
   return valores.reduce((soma, valor) => soma + valor, 0) / valores.length
 }
 
+
+
+
+//PROCURA NA LISTA E ENCONTRA O MAIOR Nº DE TODOS (FITNESS MAIS ALTO)
 // Para fitness, a maior nota é a melhor; a menor é a pior.
 // Math.max e Math.min recebem todos os itens espalhados como argumentos.
 export const calcularMelhor = (valores) => (valores.length === 0 ? null : Math.max(...valores))
+
+//PROCURA NA LISTA E ENCONTRA O MENOR Nº (O PIOR FITNESS)
 export const calcularPior = (valores) => (valores.length === 0 ? null : Math.min(...valores))
+
 
 // A amplitude mostra a distância entre o maior e o menor resultado.
 export function calcularAmplitude(valores) {
@@ -19,6 +32,9 @@ export function calcularAmplitude(valores) {
   // Reaproveita as funções acima e subtrai o menor valor do maior.
   return calcularMelhor(valores) - calcularPior(valores)
 }
+
+
+
 
 // Mede a variação em torno da média usando o desvio padrão amostral.
 export function calcularDesvioPadrao(valores) {
@@ -32,6 +48,9 @@ export function calcularDesvioPadrao(valores) {
   return Math.sqrt(somaQuadrados / (valores.length - 1))
 }
 
+
+
+
 // Mede em milissegundos quanto uma função síncrona ou assíncrona leva para terminar.
 export async function cronometrar(funcao) {
   // performance.now() marca o início com precisão adequada para medir duração.
@@ -41,6 +60,8 @@ export async function cronometrar(funcao) {
   // Devolve o resultado original e a diferença entre o horário final e o inicial.
   return { resultado, tempoExecucao: performance.now() - inicio }
 }
+
+
 
 // Recebe os resultados de várias rodadas do mesmo cenário e calcula seus resumos.
 export function resumirRodadas(resultados) {

@@ -1,10 +1,25 @@
+//ESSE ARQUIVO GUARDA OS NÚMEROS, TAXAS E PESOS IMPORTANTES DO SISTEMA EM UM ÚNICO LUGAR.
+
+
+
+
+
+//CONTÉM A CONVERSÃO DOS TEXTOS DE ILUMINAÇÃO PARA NÚMEROS
 // Atribui um número a cada nível para comparar as necessidades de luz.
+// o arquivo de configuração usa chaves {} logo após o sinal de igual.
+//Em JavaScript, isso significa que estamos exportando Objetos Globais de Configuração.
+//Eles servem como um "dicionário" centralizado de regras. 
 export const NIVEIS_LUMINOSIDADE = {
   baixa: { valor: 1, rotulo: 'baixa' },
   media: { valor: 2, rotulo: 'média' },
   alta: { valor: 3, rotulo: 'alta' },
 }
 
+
+
+
+
+//CONTÉM OS NÚMEROS QUE CONTROLAM O TAMANHO E O TEMPO DO ALGORITMO GENETICO
 // Valores fixos do genético: quantas soluções há por geração, quantas gerações executar,
 // chance de cruzamento, chance de mutação por planta e quantas soluções preservar.
 export const PARAMETROS_PADRAO_GENETICO = {
@@ -17,6 +32,11 @@ export const PARAMETROS_PADRAO_GENETICO = {
   tamanhoTorneio: 3, // participantes comparados para escolher cada pai
 }
 
+
+
+
+
+//CONTÉM A BALANÇA DE DE PONTOS QUE A FUNÇÃO FITNESS VAI USAR
 // Estes pesos preservam a função de fitness já usada pelos dois algoritmos.
 export const PARAMETROS_FITNESS = {
   toleranciaTemperatura: 5,

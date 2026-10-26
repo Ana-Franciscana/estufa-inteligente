@@ -1,3 +1,7 @@
+//A UNICA FUNÇÃO DESSE ARQUIVO É BARRAR DADOS IMPOSSÍVEIS OU MAL FORMATADOS ANTES QUE ELES
+//ENTREM NOS MOTORES DE CÁLCULO E TRAVEL O PROGRAMA COM UMA TELA DE ERRO
+
+
 import { NIVEIS_LUMINOSIDADE } from '../dados/configuracao.js'
 
 const ehNumero = Number.isFinite
@@ -8,6 +12,8 @@ export function zonaExiste(idZona, zonas) {
   return zonas.some((zona) => zona.id === idZona)
 }
 
+
+//Analisa a ficha técnica de uma planta cadastrada e procura por erros absurdos.
 export function validarPlanta(planta) {
   const erros = []
   if (!nomeValido(planta.nome)) erros.push('Informe o nome da planta.')
@@ -27,6 +33,10 @@ export function validarPlanta(planta) {
   return erros
 }
 
+
+
+
+// Faz a mesma checagem de segurança, mas olhando para as propriedades físicas da estufa.
 export function validarZona(zona) {
   const erros = []
   if (!nomeValido(zona.nome)) erros.push('Informe o nome da zona.')
@@ -38,6 +48,11 @@ export function validarZona(zona) {
   return erros
 }
 
+
+
+
+
+//Garante que o jogo da distribuição tenha peças suficientes para começar.
 export function validarProblema(plantas, zonas) {
   const erros = []
   if (!Array.isArray(plantas) || plantas.length === 0) erros.push('Cadastre ao menos uma planta.')
@@ -45,6 +60,11 @@ export function validarProblema(plantas, zonas) {
   return erros
 }
 
+
+
+
+
+//• Ela inspeciona o vetor final de respostas gerado pela Busca Gulosa ou pelo Algoritmo Genético.
 export function validarSolucao(solucao, plantas, zonas) {
   if (!Array.isArray(solucao)) return ['A solução deve ser uma lista de zonas.']
   const erros = []

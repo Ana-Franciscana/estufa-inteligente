@@ -1,3 +1,7 @@
+//ESSE ARQUIVO SERVE PARA CRIAR TRÊS AMBIENTES DE TESTE DIFERENTES (CENÁRIOS)
+//SÓ ALTERA A QUANTIDADE DE ÁGUA DISPONÍVEL NA ESTUFA
+//ELE É USADAO EM main.js PARA CRIAR OS BOTOÕES CLICÁVEIS NA TELA
+
 import { ZONAS_INICIAIS } from './dados/zonas.js'
 
 // Cria cada simulação a partir das mesmas zonas. Só muda a água disponível.
